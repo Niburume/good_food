@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1056136077133",
+    "firebase_url": "https://good-food-a7f51-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "good-food-a7f51",
+    "storage_bucket": "good-food-a7f51.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056136077133:android:f2532d83d9d2352d5a6104",
+        "android_client_info": {
+          "package_name": "com.example.mall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqZEdoMJcXyyOiVnUhs73vyITTkg0AwYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

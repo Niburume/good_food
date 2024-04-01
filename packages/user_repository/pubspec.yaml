@@ -1,0 +1,28 @@
+name: user_repository
+description: Dart package which manages the user.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^0.13.5
+  rxdart: ^0.27.4
+
+  # // Firebase
+  firebase_auth: ^4.17.5
+  firebase_core: ^2.25.4
+  cloud_firestore: ^4.15.5
+  firebase_storage: ^11.6.6
+  firebase_messaging: ^14.7.16
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
