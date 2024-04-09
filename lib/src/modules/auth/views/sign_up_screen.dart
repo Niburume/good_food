@@ -1,3 +1,5 @@
+import 'package:mall/src/extensions/build_context.dart';
+
 import '../../../utils/strings.dart';
 import '../blocs/sign_up_bloc/sign_up_bloc.dart';
 import '../components/textfield.dart';
@@ -51,13 +53,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
             title: Text(
               'Sign Up',
               style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: 34,
-                  fontWeight: FontWeight.w500),
+                fontSize: 34,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           body: SingleChildScrollView(

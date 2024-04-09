@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:mall/src/components/list_tiles/setting_list_tile.dart';
-import 'package:mall/src/components/restart/restart_widget.dart';
 import 'package:mall/src/modules/themes/theme_bloc.dart';
 import 'package:mall/src/utils/colors.dart';
 import 'package:mall/src/utils/styles.dart';
@@ -118,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               print(selected);
               context
                   .read<ThemeBloc>()
-                  .add(ChangeThemeEvent(null, selected.first as ThemeMode));
+                  .add(ChangeThemeEvent(null, selected.first));
             },
             multiSelectionEnabled: false,
             segments: [

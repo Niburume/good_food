@@ -1,15 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mall/src/components/list_tiles/product_tile.dart';
+
+import 'package:mall/src/components/my_textfield.dart';
+import 'package:mall/src/components/switches/my_switch.dart';
+import 'package:mall/src/extensions/build_context.dart';
+import 'package:mall/src/modules/add_item_bar/bloc/add_item_bar_cubit.dart';
 import 'package:mall/src/modules/home/blocs/item/product_item_cubit.dart';
 
-import 'package:mall/src/modules/home/blocs/product_list_bloc.dart';
-import 'package:mall/src/modules/home/services/prouct_items_handler.dart';
+import 'package:mall/src/modules/home/views/my_reordable_listview.dart';
 
-import '../../../components/search_textfield.dart';
+import '../../add_item_bar/views/add_item_bar.dart';
+
 import '../model/dummyModel.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,198 +23,204 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey();
-  final GlobalKey<AnimatedListState> _listKeyChecked =
-      GlobalKey<AnimatedListState>();
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  bool _isHistoryVisible = false;
+  bool _isItemBarVisible = false;
 
-  bool isHistoryVisible = false;
+  late final AnimationController _animationController;
 
-  final TextEditingController addItemController = TextEditingController();
-  final FocusNode addItemFocusNode = FocusNode();
-  List<MyProductItem> products = [];
-  List<MyProductItem> completedProducts = [];
+  final TextEditingController _addItemController = TextEditingController();
+  final FocusNode _addItemFocusNode = FocusNode();
+
   // region ITEMS
-
-  // void addItem() {
-  //   if (addItemController.text.isEmpty) {
-  //     addItemFocusNode.unfocus();
-  //     return;
-  //   }
-  //   print(addItemController.text);
-  //   _productItems.insert(
-  //       0,
-  //       MyProductItem.empty.copyWith(
-  //           id: (_productItems.length + 1).toString(),
-  //           name: addItemController.text));
-  //   addItemController.clear();
-  //   addItemFocusNode.requestFocus();
-  //   setState(() {});
-  // }
-
-  void uncheckItem(
-    MyProductItem product,
-  ) {
-    context.read<ProductItemCubit>().uncheckItem(product);
+  void addItem() {
+    if (_addItemController.text.isEmpty) return;
+    context.read<ProductListCubit>().insertItem(MyProductItem.empty
+        .copyWith(id: UniqueKey().toString(), name: _addItemController.text));
+    _addItemController.clear();
+    _addItemFocusNode.requestFocus();
+    context.read<AddItemBarCubit>().clear();
+    setState(() {});
   }
 
-  void checkItem(MyProductItem product) {
-    context.read<ProductItemCubit>().checkItem(product);
-    // print(_listKey.toString());
-    // _listKey.currentState?.removeItem(
-    //     i,
-    //     (context, animation) => SizeTransition(
-    //         sizeFactor: animation,
-    //         child: KProductTile(
-    //           isLoading: false,
-    //           product: product,
-    //           onFavoriteTapped: () {},
-    //           onCheckTapped: () {},
-    //         )),
-    //     duration: Duration(milliseconds: 200));
-    // print(_listKey.toString());
-    // _listKey.currentState?.insertItem(
-    //   0,
-    //   duration: Duration(milliseconds: 200),
-    // );
+  void onChange() {
+    context.read<AddItemBarCubit>().filterWrapper(_addItemController.text);
   }
+
+  void onCheckTapped(MyProductItem product, int index) {}
 
   // endregion
 
   void showHistory() {
-    isHistoryVisible = !isHistoryVisible;
+    _isHistoryVisible = !_isHistoryVisible;
     setState(() {});
   }
 
-  void loadAllProducts() {
-    context.read<ProductListBloc>().add(LoadAllProductsEvent());
+  _onFocusChange() {
+    if (_addItemFocusNode.hasFocus) {
+      _isItemBarVisible = true;
+      setState(() {});
+    } else {
+      _isItemBarVisible = false;
+      setState(() {});
+    }
   }
 
   @override
   void initState() {
-    loadAllProducts();
+    // TODO: implement initState
     super.initState();
+    _animationController = AnimationController(vsync: this);
+    _addItemFocusNode.addListener(() {
+      _onFocusChange();
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _animationController.dispose();
+    _addItemController.dispose();
+    _addItemFocusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: BlocConsumer<ProductListBloc, ProductListState>(
+    return BlocListener<AddItemBarCubit, AddItemBarState>(
       listener: (context, state) {
-        if (state is ProductListLoaded) {
-          context.read<ProductItemCubit>().setAllProducts(state.allProducts);
+        if (state.actionStatus == AddItemBarAction.currentState) {
+          _addItemController.text = state.currentValue;
+          setState(() {});
         }
-        ;
       },
-      builder: (context, state) {
-        print('build');
-        if (state is ProductListLoaded) {
-          return BlocBuilder<ProductItemCubit, ProductItemState>(
-            builder: (context, productItemState) {
-              completedProducts = productItemState.completedProducts;
-              products = productItemState.products;
-              return CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    title: Text('Home'),
-                    actions: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {});
-                          },
-                          icon: Icon(Icons.refresh))
-                    ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Home'),
+          actions: [
+            if (context.watch<ProductListCubit>().state.isReorderAbleState)
+              IconButton(
+                onPressed: () {
+                  context.read<ProductListCubit>().toggleReorderAbleState();
+                },
+                icon: Padding(
+                  padding: const EdgeInsets.only(right: 30.0),
+                  child: Animate(
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      size: 30,
+                      color: context.primary,
+                    ),
+                  )
+                      .animate(
+                        onPlay: (controller) =>
+                            controller.repeat(reverse: true),
+                      )
+                      .flipH(
+                          delay: 300.ms, duration: 1000.ms, begin: 0, end: 1),
+                ),
+              )
+          ],
+        ),
+        body: BlocConsumer<ProductListCubit, ProductListState>(
+          listener: (context, state) {},
+          builder: (context, state) {
+            if (state.status == ListStatus.normal) {
+              if (context
+                  .read<AddItemBarCubit>()
+                  .state
+                  .valuesForWrapper
+                  .isEmpty)
+                context.read<AddItemBarCubit>().setSearchValuesForWrapper(
+                    state.completedModels + state.uncompletedModels);
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      children: [
+                        MyReorderAbleList(
+                          key: ValueKey(1),
+                          isCompletedItemsView: false,
+                        ),
+                        MyArrowSwitch(
+                            isHistoryVisible: _isHistoryVisible,
+                            title: 'show history',
+                            onTap: () {
+                              showHistory();
+                            }),
+                        AnimatedOpacity(
+                          opacity: _isHistoryVisible ? 1 : 0,
+                          duration: Duration(milliseconds: 800),
+                          child: AnimatedContainer(
+                            height: _isHistoryVisible ? 500 : 0,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.easeIn,
+                            child: MyReorderAbleList(
+                              key: ValueKey(2),
+                              isCompletedItemsView: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-
-                  SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                          childCount: products.length, (context, i) {
-                    MyProductItem product = products[i];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4),
-                      child: KProductTile(
-                        isLoading: false,
-                        product: product,
-                        onFavoriteTapped: () {},
-                        onCheckTapped: () {
-                          checkItem(product);
-                        },
-                      ),
-                    );
-                  })),
-                  // region toggle button
-                  SliverToBoxAdapter(
-                    child: GestureDetector(
-                      onTap: () {
-                        showHistory();
-                      },
+                  AnimatedOpacity(
+                    opacity: context
+                            .read<ProductListCubit>()
+                            .state
+                            .isReorderAbleState
+                        ? 0
+                        : 1,
+                    duration: Duration(milliseconds: 300),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 20),
-                        child: Row(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(
-                              'Show checked',
+                            AnimatedOpacity(
+                              opacity: _isItemBarVisible ? 1 : 0,
+                              duration: Duration(milliseconds: 300),
+                              child: _isItemBarVisible
+                                  ? MyAddItemBar(
+                                      text: _addItemController.text,
+                                    )
+                                  : SizedBox.shrink(),
                             ),
-                            Icon(
-                              Icons.arrow_drop_down_outlined,
-                              size: 30,
-                              color: Theme.of(context).colorScheme.secondary,
-                            )
+                            MyTextField(
+                                controller: _addItemController,
+                                focusNode: _addItemFocusNode,
+                                hintText: 'Add item...',
+                                onChange: () {
+                                  onChange();
+                                },
+                                onClear: () {},
+                                onSubmitted: () {
+                                  addItem();
+                                }),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  // endregion
-                  isHistoryVisible
-                      ? SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                              childCount: completedProducts.length,
-                              (context, i) {
-                          MyProductItem product = completedProducts[i];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 4),
-                            child: KProductTile(
-                              isLoading: false,
-                              product: product,
-                              onFavoriteTapped: () {},
-                              onCheckTapped: () {
-                                uncheckItem(product);
-                              },
-                            ),
-                          );
-                        }))
-                      : SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 100,
-                          ),
-                        ),
-                  // SliverToBoxAdapter(
-                  //   child: CustomSearchTextField(
-                  //     focusNode: addItemFocusNode,
-                  //     controller: addItemController,
-                  //     onChange: () {},
-                  //     onClear: () {},
-                  //     onSubmitted: () {},
-                  //   ),
-                  // )
                 ],
               );
-            },
-          );
-        } else if (state is ProductListLoading) {
-          return Center(
-            child: SizedBox(
-                height: 60, width: 60, child: CircularProgressIndicator()),
-          );
-        } else {
-          return Text('Error');
-        }
-      },
-    ));
+            } else if (state.status == ListStatus.loading) {
+              return Center(
+                child: SizedBox(
+                    height: 60, width: 60, child: CircularProgressIndicator()),
+              );
+            } else {
+              return Text('Error');
+            }
+          },
+        ),
+      ),
+    );
   }
 }

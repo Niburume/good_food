@@ -1,3 +1,5 @@
+import 'package:mall/src/extensions/build_context.dart';
+
 import '../blocs/authentication_bloc/authentication_bloc.dart';
 import '../blocs/sign_in_bloc/sign_in_bloc.dart';
 import '../blocs/sign_up_bloc/sign_up_bloc.dart';
@@ -35,7 +37,7 @@ class _WelcomePageState extends State<WelcomePage>
         backgroundColor: Theme.of(context).colorScheme.background,
         body: SingleChildScrollView(
           child: Container(
-            color: Colors.black,
+            color: context.secondary.withOpacity(0.5),
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
             child: Stack(
@@ -123,30 +125,13 @@ class _WelcomePageState extends State<WelcomePage>
                             width: 100,
                             height: 100,
                             decoration: BoxDecoration(
-                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(12)),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'F',
-                                    style: TextStyle(
-                                      fontSize: 50,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    'K',
-                                    style: TextStyle(
-                                      fontSize: 50,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w200,
-                                    ),
-                                  ),
-                                ],
+                              child: Icon(
+                                Icons.check_box_outlined,
+                                size: 100,
+                                color: context.secondary,
                               ),
                             ))),
                   ),

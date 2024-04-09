@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mall/src/utils/theme/custom_themes/app_bar_theme.dart';
 
 ThemeData getTheme({required Color seedColor, bool isLight = true}) {
   return isLight

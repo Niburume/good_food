@@ -1,3 +1,5 @@
+import 'package:mall/src/extensions/build_context.dart';
+
 import '../../../utils/strings.dart';
 import '../blocs/authentication_bloc/authentication_bloc.dart';
 import '../blocs/sign_in_bloc/sign_in_bloc.dart';
@@ -134,11 +136,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         },
                         style: TextButton.styleFrom(
                             elevation: 3.0,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
+                            backgroundColor: context.primary,
+                            foregroundColor: context.backgroud,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12))),
+                                borderRadius: BorderRadius.circular(8))),
                         child: const Padding(
                           padding:
                               EdgeInsets.symmetric(horizontal: 25, vertical: 5),
@@ -146,7 +147,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             'Login',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white,
                               fontSize: 16,
                             ),
                           ),

@@ -5,3 +5,9 @@ extension StrFormat on String {
     return values.join();
   }
 }
+
+extension CutString on String {
+  String cutString(int length) {
+    return length >= this.length ? this : (substring(0, length) + '...');
+  }
+}

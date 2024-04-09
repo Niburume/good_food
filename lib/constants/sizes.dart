@@ -1,0 +1,1 @@
+double kProductTileSize = 60;

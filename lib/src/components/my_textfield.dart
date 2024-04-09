@@ -1,37 +1,47 @@
 import 'package:flutter/material.dart';
 
-class CustomSearchTextField extends StatefulWidget {
+class MyTextField extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
-  final VoidCallback onChange;
-  final VoidCallback onClear;
-  final VoidCallback onSubmitted;
+  final VoidCallback? onChange;
+  final VoidCallback? onClear;
+  final VoidCallback? onSubmitted;
   final IconData icon;
   final String hintText;
-  const CustomSearchTextField(
+  final int maxLines;
+  final TextInputType? keyboardType;
+  const MyTextField(
       {required this.controller,
-      required this.onChange,
-      required this.onClear,
-      required this.onSubmitted,
+      this.onChange,
+      this.onClear,
+      this.onSubmitted,
       this.focusNode,
+      this.keyboardType,
+      this.maxLines = 1,
       this.icon = Icons.search,
       this.hintText = 'Search...',
       super.key});
 
   @override
-  State<CustomSearchTextField> createState() => _CustomSearchTextFieldState();
+  State<MyTextField> createState() => _MyTextFieldState();
 }
 
-class _CustomSearchTextFieldState extends State<CustomSearchTextField> {
+class _MyTextFieldState extends State<MyTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      maxLines: widget.maxLines,
+      minLines: 1,
       focusNode: widget.focusNode,
+      keyboardType: widget.keyboardType ?? TextInputType.text,
       onChanged: (value) {
+        if (widget.onChange == null) return;
+        widget.onChange!();
         setState(() {});
       },
       onSubmitted: (value) {
-        widget.onSubmitted();
+        if (widget.onSubmitted == null) return;
+        widget.onSubmitted!();
       },
       controller: widget.controller,
       decoration: InputDecoration(
